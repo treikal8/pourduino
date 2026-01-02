@@ -1,0 +1,4 @@
+-Arduino nano
+-7 botones
+-OLED 178X32
+-Cables

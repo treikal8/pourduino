@@ -1,4 +1,7 @@
 -Arduino nano
+
 -7 botones
+
 -OLED 128X32 (comuniacion I2C)
+
 -Cables

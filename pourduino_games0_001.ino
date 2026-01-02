@@ -442,7 +442,7 @@ void minijuego_flappypou(){
   float c=10;
   int d=0;
   while(fallos==0 && tubo1.get_evitados()+tubo2.get_evitados()+tubo3.get_evitados()<1000){
-    player_y+=0.2*(i);//movimiento
+    player_y+=0.1*(i);//movimiento
 
     int lectura1=digitalRead(A);
     if(lectura1==0){//Cuando me impulse

@@ -517,7 +517,7 @@ void setup()
 void loop() 
 {
   do{
-    minijuego_flappypou();
+    minijuego_flappypou(); //Funcion del minijuego aqui
   }while(1); //digitalRead(A)==0
   display.clearDisplay();
   display.display();

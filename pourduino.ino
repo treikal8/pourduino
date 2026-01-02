@@ -1,0 +1,525 @@
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+//Teclas (pines digitales)
+#define ARRIBA 4
+#define ABAJO 5
+#define IZQUIERDA 2
+#define DERECHA 3
+#define A 6
+#define B 7
+#define START 8
+ 
+#define OLED_RESET 4
+
+Adafruit_SSD1306 display(128,32, &Wire, OLED_RESET);
+
+
+/*SPRITES*/
+
+/*MENU*/
+// 'pou_asustado', 15x15px
+const unsigned char PROGMEM pou_asustado []= {
+	0x07, 0x80, 0x0c, 0xe0, 0x18, 0x30, 0x16, 0x08, 0x3c, 0x68, 0x68, 0x84, 0x4a, 0xa4, 0xc8, 0x86, 
+	0x84, 0x42, 0x80, 0x02, 0x83, 0xc2, 0x80, 0x02, 0xc0, 0x0e, 0x60, 0x0c, 0x3f, 0xf0
+};
+// 'pou_fachero', 15x15px
+const unsigned char PROGMEM pou_fachero []= {
+	0x07, 0x80, 0x0c, 0xe0, 0x18, 0x30, 0x10, 0x10, 0x30, 0x18, 0x7f, 0xfc, 0x4c, 0xd4, 0xc6, 0x66, 
+	0x83, 0x82, 0x82, 0xe2, 0x83, 0x32, 0x80, 0xf2, 0xc0, 0x36, 0x60, 0x0c, 0x3f, 0xf0
+};
+// 'pou_feliz', 15x15px
+const unsigned char PROGMEM pou_feliz [] = {
+	0x07, 0x80, 0x0c, 0xe0, 0x18, 0x30, 0x10, 0x10, 0x30, 0x18, 0x64, 0x8c, 0x44, 0x84, 0xc4, 0x86, 
+	0x80, 0x02, 0x80, 0x02, 0x88, 0x42, 0x87, 0x82, 0xc0, 0x06, 0x60, 0x0c, 0x3f, 0xf0
+};
+// 'pou_hambriento', 15x15px
+const unsigned char PROGMEM pou_hambriento [] = {
+	0x07, 0x80, 0x0c, 0xe0, 0x18, 0x30, 0x10, 0x10, 0x30, 0x18, 0x60, 0x0c, 0x4e, 0xe4, 0xc0, 0x06, 
+	0x80, 0x02, 0x83, 0x82, 0x87, 0xc2, 0x87, 0xc2, 0xc0, 0x06, 0x60, 0x0c, 0x3f, 0xf0
+};
+// 'pou_maldesalud', 15x15px
+const unsigned char PROGMEM pou_maldesalud [] = {
+	0x07, 0x80, 0x0c, 0xe0, 0x18, 0x30, 0x10, 0x10, 0x30, 0x18, 0x6e, 0xec, 0x4a, 0xa4, 0xce, 0xe6, 
+	0x80, 0x02, 0x80, 0x02, 0x83, 0x82, 0x84, 0x42, 0xc0, 0x06, 0x60, 0x0c, 0x3f, 0xf0
+};
+// 'pou_sonrisa', 15x15px
+const unsigned char PROGMEM pou_sonrisa [] = {
+	0x07, 0x80, 0x0c, 0xe0, 0x18, 0x30, 0x10, 0x10, 0x30, 0x18, 0x60, 0x0c, 0x4e, 0xe4, 0xca, 0xa6, 
+	0x80, 0x02, 0x8f, 0xe2, 0x84, 0x42, 0x87, 0xc2, 0xc0, 0x06, 0x60, 0x0c, 0x3f, 0xf0
+};
+// 'pou_triste', 15x15px
+const unsigned char PROGMEM pou_triste [] = {
+	0x07, 0x80, 0x0c, 0xe0, 0x18, 0x30, 0x10, 0x10, 0x30, 0x18, 0x64, 0x8c, 0x44, 0x84, 0xc4, 0x86, 
+	0x80, 0x02, 0x80, 0x02, 0x87, 0xc2, 0x88, 0x22, 0xc8, 0x26, 0x60, 0x0c, 0x3f, 0xf0
+};
+// 'pou_zzz', 15x15px
+const unsigned char PROGMEM pou_zzz []  = {
+	0xe7, 0x8e, 0x4c, 0xe4, 0x98, 0x38, 0xf0, 0x1e, 0x30, 0x18, 0x6a, 0xa4, 0x4a, 0xa4, 0xce, 0xe6, 
+	0x80, 0x02, 0x80, 0x02, 0x87, 0xc2, 0x80, 0x02, 0xc0, 0x0e, 0x60, 0x0c, 0x3f, 0xf0
+};
+
+
+
+/*Minijuego de la comida*/
+// 'poum', 8x8px
+const unsigned char PROGMEM poum []  = {
+	0x07, 0xf8, 0x00, 0x08, 0x04, 0x00, 0x12, 0x12, 0x00, 0x22, 0x11, 0x00, 0x40, 0x00, 0x80, 0x47, 
+	0xf8, 0x80, 0x88, 0x04, 0x40, 0x90, 0x02, 0x40, 0x90, 0x02, 0x40, 0x90, 0x02, 0x40, 0x90, 0x02, 
+	0x40, 0x90, 0x02, 0x40, 0x4f, 0xfc, 0x80, 0x20, 0x01, 0x00, 0x1f, 0xfe, 0x00
+};
+// 'machete', 8x8px
+const unsigned char PROGMEM machete []= {
+	0xc2, 0x66, 0x3e, 0x3e, 0x78, 0xfc, 0xf6, 0xc3
+};
+// 'helado', 8x8px
+const unsigned char PROGMEM helado []= {
+	0x7e, 0xff, 0xff, 0x7f, 0x22, 0x12, 0x0a, 0x06
+};
+
+
+/*Minijuego Flappy Pou*/
+const unsigned char PROGMEM tubo [] = {
+	0xff, 0x81, 0x81, 0xff
+};
+
+const unsigned char PROGMEM cohete_pou []  = {
+	0x2c, 0x5e, 0x75, 0xbf, 0xbf, 0xff, 0x1e
+};
+
+
+long puntaje_max_gloton=0;
+int monedas=0;
+int fallos=0;
+int randnum=0; //PARA NUMEROS ALEATORIOS
+
+
+/*CLASES*/
+
+class Menu{
+  int habitacion;
+  public:
+    Menu(int);
+    void eleccion();
+    void sala_de_juegos();
+    void cocina();
+    void cuarto();
+    void sala_de_aseo();
+    void tienda();
+    void area_salud();
+    void lista_de_juegos();
+};
+
+Menu::Menu(int _habitacion){
+  habitacion=_habitacion;
+}
+
+void Menu::eleccion(){
+  switch(habitacion){
+    case 0: sala_de_juegos();break;
+    case 1: cocina();break;
+    case 2: cuarto();break;
+    case 3: sala_de_aseo();break;
+    case 4: tienda();break;
+    case 5: area_salud();break;
+  }
+}
+
+void Menu::sala_de_juegos(){
+  display.setCursor(20,0);
+  display.print("juegos");
+  if(digitalRead(A)==1){
+    lista_de_juegos();
+  }
+}
+
+void Menu::lista_de_juegos(){
+  int i=0;
+  int lectura1;
+  int lectura2;
+  lectura1=digitalRead(ARRIBA);
+  lectura2=digitalRead(ABAJO);
+  if(lectura1==1 && i!=0){
+    i--;
+  }
+  else if(lectura2==1 && i!=5){
+    i++;
+  }
+  else{}
+
+  switch(i){
+    case 0:  while(1);
+  }
+}
+
+
+class Pou{
+  float x;
+  float y;
+  //ancho=18;
+  //largo=15;
+  public:
+    Pou(int,int);
+    void dibujar();
+    bool colision(int);
+    void colision_ene(int);
+    void set_x(int);
+    void set_y(int);
+};
+
+Pou::Pou(int _x,int _y){
+  x=_x;
+  y=_y;
+}
+
+void Pou::dibujar(){
+  int lectura1=digitalRead(IZQUIERDA);
+  int lectura2=digitalRead(DERECHA);
+  int lectura3=digitalRead(A);
+  int lectura4=digitalRead(B);
+  if(lectura1==0 && x>40){
+    x-=7.2;
+    if(x<40) x=40;
+  }
+  else if(lectura2==0 && x<110){
+    x+=7.2;
+    if(x>110) x=110;
+  }
+  else if(lectura3==0){
+    x=40;
+  }
+  else if(lectura4==0){
+    x=110;
+  }
+  display.drawBitmap(x,y,poum,18,15,WHITE);
+}
+
+bool Pou::colision(int ob_x){
+  if((ob_x>=x+1) && (ob_x<=14+x)){
+    return 1;
+  }
+  return 0;
+}
+
+void Pou::colision_ene(int ob_x){
+  if((ob_x>=x+2) && (ob_x<=14+x)){
+    fallos=8;
+  }
+}
+
+void Pou::set_x(int _x){
+  x=_x;
+}
+
+void Pou::set_y(int _y){
+  y=_y;
+}
+
+
+class Comida{
+  float x;
+  float y;
+  float velocidad;
+  int ancho=7;
+  int largo=7;
+  bool toque=false;
+  public:
+    Comida(int,int,float);
+    void dibujar();
+    int get_x();
+    int get_y();
+    void set_toque(bool);
+};
+
+Comida::Comida(int _x,int _y,float _velocidad){
+  x=_x;
+  y=_y;
+  velocidad=_velocidad;
+}
+
+void Comida::dibujar(){
+  y+=velocidad;
+  if(y>=32 || toque==true){
+    if(y>=32) fallos++;
+    y=-4;
+    x=random(78)+44;  
+    toque=false;
+  }
+  display.drawBitmap(x,y,helado,7,7,WHITE);
+}
+
+int Comida::get_x(){
+  return x;
+}
+
+int Comida::get_y(){
+  return y;
+}
+void Comida::set_toque(bool t){
+  toque=t;
+}
+
+
+class Obstaculo{
+  int x;
+  float y;
+  //int ancho=8;
+  //int largo=8;
+  public:
+    Obstaculo(int,int);
+    void dibujar();
+    int get_x();
+    int get_y();
+};
+
+Obstaculo::Obstaculo(int _x,int _y){
+  x=_x;
+  y=_y;
+}
+
+void Obstaculo::dibujar(){
+  y+=0.8;
+  if(y>=32){
+    y=0;
+    x=random(78)+44;  
+  }
+  display.drawBitmap(x,y,machete,7,7,WHITE);
+}
+
+int Obstaculo::get_x(){
+  return x;
+}
+
+int Obstaculo::get_y(){
+  return y;
+}
+
+void minijuego_gloton(){ //Se colocara aca el bucle del minijuego
+  long puntaje=0;
+
+  Pou player(40,17);
+  Comida helado1(45,0,1.2);
+  Comida helado2(76,6,1.1);
+  Obstaculo machete1(100,0);
+  Obstaculo machete2(120,6);
+
+  while(fallos<=7){
+    player.dibujar();
+    helado1.dibujar();
+    helado2.dibujar();
+    machete1.dibujar();
+    machete2.dibujar();
+
+    /*COLISIONES CON COMIDA Y ENEMIGOS*/
+    if(helado1.get_y()>=20){
+      helado1.set_toque(player.colision(helado1.get_x()));
+      puntaje+=player.colision(helado1.get_x());
+    } 
+    if(helado2.get_y()>=20){
+      helado2.set_toque(player.colision(helado2.get_x()));
+      puntaje+=player.colision(helado2.get_x());
+    }
+
+    if(machete1.get_y()>=20 && machete1.get_y()<=23) player.colision_ene(machete1.get_x());
+    if(machete2.get_y()>=20 && machete2.get_y()<=23) player.colision_ene(machete2.get_x());
+    
+    //A la derecha del minijuego
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0,0);
+    display.println("score");
+    display.setCursor(0,8);
+    display.println(puntaje);
+    display.setCursor(0,16);
+    display.println("fail:");
+    display.setCursor(0,24);
+    display.println(fallos);
+    display.display();
+    delay(30);
+
+    display.clearDisplay();
+  }
+  fallos=0;
+  display.clearDisplay();
+  display.setCursor(30,10);
+  display.println("game over");
+  display.display();
+  monedas+=puntaje/4;
+  delay(1000);
+  display.clearDisplay();
+  display.setCursor(0,0);
+  display.println("puntaje: ");
+  display.setCursor(0,8);
+  display.println(puntaje);
+  display.setCursor(0,16);
+  display.println("moneda: ");
+  display.setCursor(50,16);
+  display.println(monedas);
+  display.display();
+  delay(1000);
+  display.clearDisplay();
+  if(puntaje>puntaje_max_gloton){
+    display.setCursor(0,0);
+    display.println("nuevo mayor");
+    display.setCursor(0,8);
+    display.println("puntaje");
+    display.setCursor(0,16);
+    display.println("anterior: ");
+    display.setCursor(55,16);
+    display.print(puntaje_max_gloton);
+    puntaje_max_gloton=puntaje;
+  }
+  else{
+    display.setCursor(0,0);
+    display.println("mayor puntaje");
+    display.setCursor(0,8);
+    display.println(puntaje_max_gloton);
+  }
+  display.display();
+  delay(2000);
+}
+
+class Tubos{
+  float x;
+  float y;
+  int evitados=0;
+  //ancho=8
+  //largo=4
+  public:
+    Tubos(int,int);
+    void pintar();
+    void colision(int);
+    int get_evitados();
+    int get_x();
+    void modo_juerga();
+};
+
+Tubos::Tubos(int _x,int _y){
+  x=_x;
+  y=_y;
+}
+
+void Tubos::pintar(){
+  x-=2.5;
+  display.drawBitmap(x,y,tubo,8,4,WHITE);
+  display.drawLine(x+1,y-1,x+1,0,WHITE);
+  display.drawLine(x+6,y-1,x+6,0,WHITE);
+  display.drawBitmap(x,y+20,tubo,8,4,WHITE);
+  display.drawLine(x+1,y+24,x+1,32,WHITE);
+  display.drawLine(x+6,y+24,x+6,32,WHITE);
+
+  if(x<-7){
+    x=128;
+    y=random(8)+2;
+    evitados++;
+  } 
+}
+
+void Tubos::colision(int ob_y){
+  if (y+4>ob_y || ob_y>y+12) fallos++;
+}
+
+int Tubos::get_x(){
+  return x;
+}
+
+int Tubos::get_evitados(){
+  return evitados;
+}
+
+void minijuego_flappypou(){
+  int puntaje;
+
+  float player_x=0;
+  float player_y=10;
+  Tubos tubo1(128,random(8)+2);
+  Tubos tubo2(128,random(8)+2);
+  Tubos tubo3(128,random(8)+2);
+  int clock=0;
+  int i=0;
+  float c=10;
+  int d=0;
+  while(fallos==0 && tubo1.get_evitados()+tubo2.get_evitados()+tubo3.get_evitados()<1000){
+    player_y+=0.2*(i);//movimiento
+
+    int lectura1=digitalRead(A);
+    if(lectura1==0){//Cuando me impulse
+      player_y-=2.8;
+      i=0;
+    }
+    i++;
+
+    display.drawBitmap(player_x,player_y,cohete_pou,8,7,WHITE);
+    if(player_y-8>=32) fallos++; //Si me choco con el piso, salgo del juego
+
+    //Aparicion de tubos
+    tubo1.pintar();
+    clock++;
+    if(clock>=72) tubo2.pintar();
+    if(clock>=145){
+      tubo3.pintar();
+      clock=160;
+    }
+
+    if(player_x+8>tubo1.get_x() && player_x<tubo1.get_x()+8) tubo1.colision(player_y);
+    if(player_x+8>tubo2.get_x() && player_x<tubo2.get_x()+8) tubo2.colision(player_y);
+    if(player_x+8>tubo3.get_x() && player_x<tubo3.get_x()+8) tubo3.colision(player_y);
+
+    display.display();
+    delay(30);
+    display.clearDisplay();
+  }
+  fallos=0;
+  puntaje=tubo1.get_evitados()+tubo2.get_evitados()+tubo3.get_evitados();
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(30,10);
+  display.println("game over");
+  display.display();
+  monedas+=puntaje/2;
+  delay(1000);
+  display.clearDisplay();
+  display.setCursor(0,0);
+  display.println("puntaje: ");
+  display.setCursor(0,8);
+  display.println(puntaje);
+  display.setCursor(0,16);
+  display.println("moneda: ");
+  display.setCursor(50,16);
+  display.println(monedas);
+  display.display();
+  delay(1000);
+}
+
+
+/*PROCESO*/
+void setup() 
+{
+  randomSeed(analogRead(A0));//Para resultados aleatorios en ciertos minijuegos
+  
+  //teclas
+  pinMode(ARRIBA,INPUT_PULLUP);
+  pinMode(ABAJO,INPUT_PULLUP);
+  pinMode(IZQUIERDA,INPUT_PULLUP);
+  pinMode(DERECHA,INPUT_PULLUP);
+  pinMode(B,INPUT_PULLUP);
+  pinMode(A,INPUT_PULLUP);
+  pinMode(START,INPUT_PULLUP);
+
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // here the 0x3c is the I2C address, check your i2c address if u have multiple devices.
+  display.clearDisplay();
+  delay(2000);
+}
+
+void loop() 
+{
+  do{
+    minijuego_flappypou();
+  }while(1); //digitalRead(A)==0
+  display.clearDisplay();
+  display.display();
+  while(1);
+}

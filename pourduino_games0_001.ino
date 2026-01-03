@@ -91,9 +91,13 @@ const unsigned char PROGMEM cohete_pou []  = {
 
 
 long puntaje_max_gloton=0;
+int puntaje_max_flappypou=0;
 int monedas=0;
 int fallos=0;
 int randnum=0; //PARA NUMEROS ALEATORIOS
+
+char salas[20][20] = {"Juegos","Cocina","Cuarto","Aseo","Salud"};
+int largos[5]={14,6,6,12,10};
 
 
 /*CLASES*/
@@ -110,6 +114,9 @@ class Menu{
     void tienda();
     void area_salud();
     void lista_de_juegos();
+    int get_habitacion();
+    void pasar_habitacion(bool);
+    void set_habitacion(int);
 };
 
 Menu::Menu(int _habitacion){
@@ -122,38 +129,31 @@ void Menu::eleccion(){
     case 1: cocina();break;
     case 2: cuarto();break;
     case 3: sala_de_aseo();break;
-    case 4: tienda();break;
-    case 5: area_salud();break;
+    //case 5: tienda();break;
+    case 4: area_salud();break;
   }
 }
 
-void Menu::sala_de_juegos(){
+void Menu::cocina(){
   display.setCursor(20,0);
-  display.print("juegos");
-  if(digitalRead(A)==1){
-    lista_de_juegos();
-  }
+  display.print("Cocina");
+
 }
 
-void Menu::lista_de_juegos(){
-  int i=0;
-  int lectura1;
-  int lectura2;
-  lectura1=digitalRead(ARRIBA);
-  lectura2=digitalRead(ABAJO);
-  if(lectura1==1 && i!=0){
-    i--;
+void Menu::pasar_habitacion(bool condi){
+  if(condi){
+    habitacion++;
   }
-  else if(lectura2==1 && i!=5){
-    i++;
-  }
-  else{}
-
-  switch(i){
-    case 0:  while(1);
-  }
+  else habitacion--;
 }
 
+void Menu::set_habitacion(int i){
+  habitacion=i;
+}
+
+int Menu::get_habitacion(){
+  return habitacion;
+}
 
 class Pou{
   float x;
@@ -491,7 +491,88 @@ void minijuego_flappypou(){
   display.setCursor(50,16);
   display.println(monedas);
   display.display();
+  delay(1500);
+  display.clearDisplay();
+
+  if(puntaje>puntaje_max_flappypou){
+    display.setCursor(0,0);
+    display.println("nuevo mayor");
+    display.setCursor(0,8);
+    display.println("puntaje");
+    display.setCursor(0,16);
+    display.println("anterior: ");
+    display.setCursor(55,16);
+    display.print(puntaje_max_flappypou);
+    puntaje_max_flappypou=puntaje;
+  }
+  else{
+    display.setCursor(0,0);
+    display.println("mayor puntaje");
+    display.setCursor(0,8);
+    display.println(puntaje_max_flappypou);
+  }
+  display.display();
+  delay(2000);
+}
+
+void Menu::sala_de_juegos(){
+  display.setCursor(20,0);
+  display.print("Juegos");
+  if(digitalRead(A)==0){
+    lista_de_juegos();
+  }
+}
+
+void Menu::cuarto(){
+  display.setCursor(20,0);
+  display.print("Cuarto");
+}
+
+void Menu::sala_de_aseo(){
+  display.setCursor(20,0);
+  display.print("Aseo");
+}
+
+void Menu::area_salud(){
+  display.setCursor(20,0);
+  display.print("Salud");
+}
+
+
+void Menu::lista_de_juegos(){
+  int i=0;
   delay(1000);
+  while(digitalRead(B)==1){
+    int lectura1;
+    int lectura2;
+    lectura1=digitalRead(IZQUIERDA);
+    lectura2=digitalRead(DERECHA);
+
+    if(lectura1==0 && i!=0){
+      i--;
+    }
+    if(lectura2==0 && i!=1){
+      i++;
+    }
+    //Lista de juegos
+    display.setCursor(10,0);
+    display.print("Gloton");
+    display.setCursor(10,8);
+    display.print("flappy_pou");
+    //Cursor
+    display.setCursor(0,i*8);
+    display.print(">");
+    if(digitalRead(A)==0){
+      switch(i){
+        case 0: minijuego_gloton(); break;
+        case 1: minijuego_flappypou(); break;
+      }
+    }
+
+    display.display();
+    delay(30);
+    display.clearDisplay();
+  }
 }
 
 
@@ -514,11 +595,74 @@ void setup()
   delay(2000);
 }
 
+void transicion_de(char word1[],int largo1,char word2[],int y){
+  for(int i=20;i>0-largo1;i-=16){
+    display.setCursor(i,y);
+    display.print(word1);
+    display.display();
+    delay(30);
+    display.clearDisplay();
+  }
+  for(int i=128;i>20;i-=16){
+    display.setCursor(i,y);
+    display.print(word2);
+    display.display();
+    delay(30);
+    display.clearDisplay();
+  }
+}
+
+void transicion_iz(char word1[],int largo1,char word2[],int y){
+  for(int i=20;i<128+largo1;i+=16){
+    display.setCursor(i,y);
+    display.print(word1);
+    display.display();
+    delay(30);
+    display.clearDisplay();
+  }
+  for(int i=-20;i<16;i+=20){
+    display.setCursor(i,y);
+    display.print(word2);
+    display.display();
+    delay(30);
+    display.clearDisplay(); 
+  }
+}
+
 void loop() 
 {
-  do{
-    minijuego_flappypou(); //Funcion del minijuego aqui
-  }while(1); //digitalRead(A)==0
+  Menu M(1);
+
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+
+  while(1){
+    M.eleccion();
+    display.drawBitmap(40,10,pou_feliz,15,15,WHITE);
+
+    //cambiar de sala
+    if(digitalRead(IZQUIERDA)==0 && M.get_habitacion()>0){
+      transicion_iz(salas[M.get_habitacion()],largos[M.get_habitacion()],salas[M.get_habitacion()-1],0);
+      M.pasar_habitacion(0);
+    }
+    else if(digitalRead(IZQUIERDA)==0 && M.get_habitacion()==0){
+      transicion_iz(salas[0],largos[0],salas[4],0);
+      M.set_habitacion(4);
+    }
+    if(digitalRead(DERECHA)==0 && M.get_habitacion()<4){
+      transicion_de(salas[M.get_habitacion()],largos[M.get_habitacion()],salas[M.get_habitacion()+1],0);
+      M.pasar_habitacion(1);
+    }
+    else if(digitalRead(DERECHA)==0 && M.get_habitacion()==4){
+      transicion_de(salas[4],largos[4],salas[0],0);
+      M.set_habitacion(0);
+    }
+     
+    
+    display.display();
+    delay(30);
+    display.clearDisplay();
+  }
   display.clearDisplay();
   display.display();
   while(1);

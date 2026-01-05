@@ -31,9 +31,12 @@ const unsigned char PROGMEM pou_fachero []= {
 	0x83, 0x82, 0x82, 0xe2, 0x83, 0x32, 0x80, 0xf2, 0xc0, 0x36, 0x60, 0x0c, 0x3f, 0xf0
 };
 // 'pou_feliz', 15x15px
-const unsigned char PROGMEM pou_feliz [] = {
-	0x07, 0x80, 0x0c, 0xe0, 0x18, 0x30, 0x10, 0x10, 0x30, 0x18, 0x64, 0x8c, 0x44, 0x84, 0xc4, 0x86, 
-	0x80, 0x02, 0x80, 0x02, 0x88, 0x42, 0x87, 0x82, 0xc0, 0x06, 0x60, 0x0c, 0x3f, 0xf0
+const unsigned char PROGMEM  pou_feliz [] = {
+	0x00, 0x7f, 0x00, 0x00, 0x01, 0xff, 0xf0, 0x00, 0x01, 0xe1, 0xf0, 0x00, 0x07, 0x80, 0x18, 0x00, 
+	0x06, 0x00, 0x08, 0x00, 0x0e, 0x00, 0x0f, 0x00, 0x78, 0x61, 0x87, 0x80, 0x78, 0x61, 0x87, 0x80, 
+	0x70, 0x61, 0x80, 0x80, 0xf0, 0x61, 0x80, 0xe0, 0xc0, 0x00, 0x00, 0x60, 0xc0, 0x00, 0x00, 0x60, 
+	0xc0, 0x00, 0x00, 0x60, 0xc1, 0x80, 0xe0, 0x60, 0xc0, 0x7f, 0x00, 0x60, 0xf0, 0x00, 0x00, 0xe0, 
+	0x78, 0x00, 0x07, 0x80, 0x78, 0x00, 0x07, 0x80, 0x0f, 0xff, 0xf8, 0x00
 };
 // 'pou_hambriento', 15x15px
 const unsigned char PROGMEM pou_hambriento [] = {
@@ -89,19 +92,181 @@ const unsigned char PROGMEM cohete_pou []  = {
 	0x2c, 0x5e, 0x75, 0xbf, 0xbf, 0xff, 0x1e
 };
 
-
 long puntaje_max_gloton=0;
 int puntaje_max_flappypou=0;
 int monedas=0;
 int fallos=0;
 int randnum=0; //PARA NUMEROS ALEATORIOS
+int timer=0;
 
 char salas[20][20] = {"Juegos","Cocina","Cuarto","Aseo","Salud"};
 int largos[5]={14,6,6,12,10};
 
+int precios_comidas[6]={7,15,6,30,4,5};//helado,sopa,manzana,sushi
+int cura_comidas[6]={10,40,13,30,1,1};
+
+
+//Estructura Pou
+struct Pou{
+  int saciedad;
+  int salud;
+  int energia;
+  int alegria;
+  int nivel;
+};
+Pou Yo={100,100,100,100,0};
+
+
+void reduccion_valores(){
+  timer++;
+  if(timer==1000){
+    Yo.saciedad-=5;
+    Yo.energia-=2;
+    Yo.alegria-=3;
+  }
+  if(timer==2000){
+    Yo.saciedad-=2;
+    Yo.alegria-=2;
+    Yo.salud-=2;
+    Yo.nivel++;
+    timer=0;
+  }
+}
+
+void comida(){
+  int i=0;
+  delay(500);
+  while(digitalRead(B)==1){
+    int lectura1;
+    int lectura2;
+    lectura1=digitalRead(IZQUIERDA);
+    lectura2=digitalRead(DERECHA);
+
+    if(lectura1==0 && i!=0){
+      i--;
+    }
+    if(lectura2==0 && i!=2){
+      i++;
+    }
+    //Lista de juegos
+    display.setCursor(40,0);
+    display.print("Comida");
+    display.setCursor(10,8);
+    display.print("helado     $");
+    display.setCursor(100,8);
+    display.print(precios_comidas[0]);
+    display.setCursor(10,16);
+    display.print("sopa       $");
+    display.setCursor(100,16);
+    display.print(precios_comidas[1]);
+    display.setCursor(10,24);
+    display.print("manzana    $");
+    display.setCursor(100,24);
+    display.print(precios_comidas[2]);
+
+
+    //Cursor
+    display.setCursor(0,i*8 + 8);
+    display.print(">");
+    if(digitalRead(A)==0){
+      if(monedas<precios_comidas[i]){
+        display.clearDisplay();
+        delay(30);
+        display.setCursor(0,0);
+        display.print("No tienes dinero");
+        display.display();
+        delay(500);
+        display.clearDisplay();
+        break;
+      }
+      monedas-=precios_comidas[i]; 
+      Yo.saciedad+=cura_comidas[i];
+      if(i==0) Yo.alegria+=4;
+      if(i==1) Yo.salud+=20;
+      if(i==1) Yo.salud+=10;
+      display.clearDisplay();
+      delay(30);
+      display.setCursor(0,0);
+      display.print("Comprado");
+      display.setCursor(0,8);
+      display.print("y comido");
+      display.setCursor(0,24);
+      display.print("monedas: ");
+      display.setCursor(80,24);
+      display.print(monedas);
+      display.display();
+      delay(500);
+      break;
+    }
+    reduccion_valores();
+    display.display();
+    delay(150);
+    display.clearDisplay();
+  }
+}
+
+void tienda(){
+  int i=0;
+  delay(200);
+  while(digitalRead(B)==1){
+    //Lista de juegos
+    display.setCursor(40,0);
+    display.print("Tienda");
+    display.setCursor(10,8);
+    display.print("Comida");
+    //Cursor
+    display.setCursor(0,i*8 +8);
+    display.print(">");
+    if(digitalRead(A)==0){
+      switch(i){
+        case 0: comida(); break;
+      }
+    }
+    display.display();
+    reduccion_valores();
+    delay(30);
+    display.clearDisplay();
+  }
+}
+
+
+
+
+void estadisticas(){
+  display.clearDisplay();
+  display.setCursor(0,0);
+  display.print("saciedad: ");
+  display.setCursor(100,0);
+  display.print(Yo.saciedad);
+  display.setCursor(0,8);
+  display.print("energia: ");
+  display.setCursor(100,8);
+  display.print(Yo.energia);
+  display.setCursor(0,16);
+  display.print("alegria: ");
+  display.setCursor(100,16);
+  display.print(Yo.alegria);
+  display.setCursor(0,24);
+  display.print("salud: ");
+  display.setCursor(100,24);
+  display.print(Yo.salud);
+  display.display();
+  delay(1400);
+  display.clearDisplay();
+  display.setCursor(0,8);
+  display.print("Nivel: ");
+  display.setCursor(100,8);
+  display.print(Yo.nivel);
+  display.setCursor(0,24);
+  display.print("Monedas: ");
+  display.setCursor(100,24);
+  display.print(monedas);
+  display.display();
+  delay(500);
+  display.clearDisplay();
+}
 
 /*CLASES*/
-
 class Menu{
   int habitacion;
   public:
@@ -111,7 +276,6 @@ class Menu{
     void cocina();
     void cuarto();
     void sala_de_aseo();
-    void tienda();
     void area_salud();
     void lista_de_juegos();
     int get_habitacion();
@@ -129,7 +293,6 @@ void Menu::eleccion(){
     case 1: cocina();break;
     case 2: cuarto();break;
     case 3: sala_de_aseo();break;
-    //case 5: tienda();break;
     case 4: area_salud();break;
   }
 }
@@ -137,7 +300,9 @@ void Menu::eleccion(){
 void Menu::cocina(){
   display.setCursor(20,0);
   display.print("Cocina");
-
+  if(digitalRead(A)==0){
+    tienda();
+  }
 }
 
 void Menu::pasar_habitacion(bool condi){
@@ -155,13 +320,28 @@ int Menu::get_habitacion(){
   return habitacion;
 }
 
-class Pou{
+void Menu::cuarto(){
+  display.setCursor(20,0);
+  display.print("Cuarto");
+}
+
+void Menu::sala_de_aseo(){
+  display.setCursor(20,0);
+  display.print("Aseo");
+}
+
+void Menu::area_salud(){
+  display.setCursor(20,0);
+  display.print("Salud");
+}
+
+class Gloton{
   float x;
   float y;
   //ancho=18;
   //largo=15;
   public:
-    Pou(int,int);
+    Gloton(int,int);
     void dibujar();
     bool colision(int);
     void colision_ene(int);
@@ -169,12 +349,12 @@ class Pou{
     void set_y(int);
 };
 
-Pou::Pou(int _x,int _y){
+Gloton::Gloton(int _x,int _y){
   x=_x;
   y=_y;
 }
 
-void Pou::dibujar(){
+void Gloton::dibujar(){
   int lectura1=digitalRead(IZQUIERDA);
   int lectura2=digitalRead(DERECHA);
   int lectura3=digitalRead(A);
@@ -196,24 +376,24 @@ void Pou::dibujar(){
   display.drawBitmap(x,y,poum,18,15,WHITE);
 }
 
-bool Pou::colision(int ob_x){
+bool Gloton::colision(int ob_x){
   if((ob_x>=x+1) && (ob_x<=14+x)){
     return 1;
   }
   return 0;
 }
 
-void Pou::colision_ene(int ob_x){
+void Gloton::colision_ene(int ob_x){
   if((ob_x>=x+2) && (ob_x<=14+x)){
     fallos=8;
   }
 }
 
-void Pou::set_x(int _x){
+void Gloton::set_x(int _x){
   x=_x;
 }
 
-void Pou::set_y(int _y){
+void Gloton::set_y(int _y){
   y=_y;
 }
 
@@ -299,7 +479,7 @@ int Obstaculo::get_y(){
 void minijuego_gloton(){ //Se colocara aca el bucle del minijuego
   long puntaje=0;
 
-  Pou player(40,17);
+  Gloton player(40,17);
   Comida helado1(45,0,1.2);
   Comida helado2(76,6,1.1);
   Obstaculo machete1(100,0);
@@ -379,6 +559,9 @@ void minijuego_gloton(){ //Se colocara aca el bucle del minijuego
   }
   display.display();
   delay(2000);
+  Yo.saciedad+=5;
+  Yo.energia-=1;
+  Yo.alegria+=10;
 }
 
 class Tubos{
@@ -513,6 +696,8 @@ void minijuego_flappypou(){
   }
   display.display();
   delay(2000);
+  Yo.energia-=8;
+  Yo.alegria+=8;
 }
 
 void Menu::sala_de_juegos(){
@@ -521,21 +706,6 @@ void Menu::sala_de_juegos(){
   if(digitalRead(A)==0){
     lista_de_juegos();
   }
-}
-
-void Menu::cuarto(){
-  display.setCursor(20,0);
-  display.print("Cuarto");
-}
-
-void Menu::sala_de_aseo(){
-  display.setCursor(20,0);
-  display.print("Aseo");
-}
-
-void Menu::area_salud(){
-  display.setCursor(20,0);
-  display.print("Salud");
 }
 
 
@@ -568,7 +738,7 @@ void Menu::lista_de_juegos(){
         case 1: minijuego_flappypou(); break;
       }
     }
-
+    reduccion_valores();
     display.display();
     delay(30);
     display.clearDisplay();
@@ -632,13 +802,13 @@ void transicion_iz(char word1[],int largo1,char word2[],int y){
 void loop() 
 {
   Menu M(1);
-
   display.setTextSize(1);
   display.setTextColor(WHITE);
 
-  while(1){
+  bool vida=true;
+  while(vida){
     M.eleccion();
-    display.drawBitmap(40,10,pou_feliz,15,15,WHITE);
+    display.drawBitmap(40,10,pou_feliz,27,19,WHITE);
 
     //cambiar de sala
     if(digitalRead(IZQUIERDA)==0 && M.get_habitacion()>0){
@@ -657,13 +827,45 @@ void loop()
       transicion_de(salas[4],largos[4],salas[0],0);
       M.set_habitacion(0);
     }
+
+    if(digitalRead(START)==0) estadisticas();
      
-    
     display.display();
+
+    //Timer y reduccion de estadisticas
+    reduccion_valores();
+
+    //Verificacion de sobrepaso de valores:
+    if(Yo.alegria>100) Yo.alegria=100;
+    if(Yo.salud>100)   Yo.salud=100;
+    if(Yo.saciedad>100) Yo.saciedad=100;
+    if(Yo.energia>100)  Yo.energia=100;
+
+
+    if(Yo.salud==0 || Yo.saciedad==0 || Yo.energia==0 || Yo.alegria==0 || Yo.nivel==500){
+      vida=false;   
+    }
+    
     delay(30);
     display.clearDisplay();
   }
+
+  //Pou ha muerto
+  if(Yo.nivel<1300){
+    display.setCursor(0,0);
+    display.print("Pou ha muerto...");
+  }
+  else{
+    display.setCursor(0,0);
+    display.print("Pou ha muerto");
+    display.setCursor(0,8);
+    display.print("de vejez...");
+  }
+  display.display();
+  delay(1000);
+  estadisticas();
   display.clearDisplay();
   display.display();
+  
   while(1);
 }

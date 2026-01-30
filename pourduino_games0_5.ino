@@ -4,8 +4,6 @@
 #include <Adafruit_SSD1306.h>
 
 //Teclas (pines digitales)
-#define ARRIBA 4
-#define ABAJO 5
 #define IZQUIERDA 2
 #define DERECHA 3
 #define A 6
@@ -21,6 +19,7 @@ Adafruit_SSD1306 display(128,32, &Wire, OLED_RESET);
  
 /*MENU*/
 
+
 // 'pou_feliz', 15x15px
 const unsigned char PROGMEM  pou_feliz [] = {
 	0x00, 0x7f, 0x00, 0x00, 0x01, 0xff, 0xf0, 0x00, 0x01, 0xe1, 0xf0, 0x00, 0x07, 0x80, 0x18, 0x00, 
@@ -29,6 +28,7 @@ const unsigned char PROGMEM  pou_feliz [] = {
 	0xc0, 0x00, 0x00, 0x60, 0xc1, 0x80, 0xe0, 0x60, 0xc0, 0x7f, 0x00, 0x60, 0xf0, 0x00, 0x00, 0xe0, 
 	0x78, 0x00, 0x07, 0x80, 0x78, 0x00, 0x07, 0x80, 0x0f, 0xff, 0xf8, 0x00
 };
+
 
 // 'pou_dormidoa', 27x19px
 const unsigned char PROGMEM pou_dormidoa []  = {
@@ -41,10 +41,10 @@ const unsigned char PROGMEM pou_dormidoa []  = {
 // 'pou_enfermoa', 27x19px
 const unsigned char PROGMEM pou_enfermoa []  = {
 	0x00, 0x7f, 0x00, 0x00, 0x01, 0xff, 0xf0, 0x00, 0x01, 0xe1, 0xf0, 0x00, 0x07, 0x80, 0x18, 0x00, 
-	0x06, 0x00, 0x08, 0x00, 0x0e, 0x7b, 0xcf, 0x00, 0x7c, 0x4a, 0x4f, 0x80, 0x78, 0x4a, 0x47, 0x80, 
-	0x70, 0x7b, 0xc0, 0x80, 0xf0, 0x00, 0x00, 0xe0, 0xc0, 0x00, 0x00, 0x60, 0xc0, 0x00, 0x00, 0x60, 
-	0xc0, 0x1f, 0x80, 0x60, 0xc0, 0x20, 0x40, 0x60, 0xc0, 0x7f, 0xc0, 0x60, 0xf0, 0x00, 0x00, 0xe0, 
-	0x78, 0x00, 0x07, 0x80, 0x78, 0x00, 0x07, 0x80, 0x0f, 0xff, 0xf8, 0x00
+	0x06, 0x00, 0x08, 0x00, 0x0e, 0xf1, 0xef, 0x00, 0x7d, 0x11, 0x1f, 0x80, 0x79, 0x11, 0x17, 0x80, 
+	0x71, 0x11, 0x10, 0x80, 0xf1, 0x11, 0x10, 0xe0, 0xc0, 0xf1, 0xe0, 0x60, 0xc0, 0x00, 0x00, 0x60, 
+	0xc0, 0x00, 0x00, 0x60, 0xc0, 0x3f, 0x80, 0x60, 0xc0, 0x40, 0x40, 0x60, 0xf0, 0x40, 0x40, 0xe0, 
+	0x78, 0x7f, 0xc7, 0x80, 0x78, 0x00, 0x07, 0x80, 0x0f, 0xff, 0xf8, 0x00
 };
 // 'pou_facheroa', 27x19px
 const unsigned char pou_facheroa [] PROGMEM = {
@@ -78,6 +78,15 @@ const unsigned char pou_tristea [] PROGMEM = {
 	0xc0, 0x00, 0x00, 0x60, 0xc0, 0x7f, 0x80, 0x60, 0xc0, 0x80, 0x40, 0x60, 0xf1, 0x00, 0x40, 0xe0, 
 	0x79, 0x00, 0x27, 0x80, 0x78, 0x00, 0x07, 0x80, 0x0f, 0xff, 0xf8, 0x00
 };
+// 'pou_dormidoa2', 27x19px
+const unsigned char pou_dormidoa2 [] PROGMEM = {
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0x80, 0x00, 0x00, 0xff, 0xe0, 0x00, 0x03, 0xc0, 0x70, 0x00, 
+	0x07, 0x00, 0x38, 0x00, 0x0e, 0x00, 0x0e, 0x00, 0x3c, 0x00, 0x0f, 0x80, 0x78, 0x00, 0x07, 0xc0, 
+	0x71, 0x0a, 0x10, 0xc0, 0xf1, 0x0a, 0x10, 0xe0, 0xc1, 0x0a, 0x10, 0x60, 0xc1, 0x0a, 0x10, 0x60, 
+	0xc0, 0xf1, 0xe0, 0x60, 0xc0, 0x00, 0x00, 0x60, 0xc0, 0x00, 0x00, 0x60, 0xf0, 0x00, 0x00, 0xe0, 
+	0x78, 0x00, 0x07, 0x80, 0x78, 0x00, 0x07, 0x80, 0x0f, 0xff, 0xf8, 0x00
+};
+
 
 
 /*Minijuego de la comida*/
@@ -106,18 +115,18 @@ const unsigned char PROGMEM cohete_pou []  = {
 	0x2c, 0x5e, 0x75, 0xbf, 0xbf, 0xff, 0x1e
 };
 
-long puntaje_max_gloton=0;
+int puntaje_max_gloton=0;
 int puntaje_max_flappypou=0;
 int monedas=0;
-int fallos=0;
+uint8_t fallos=0;
 int randnum=0; //PARA NUMEROS ALEATORIOS
 int timer=0;
 
 char salas[20][20] = {"Juegos","Cocina","Cuarto","Aseo","Salud"};
-int largos[5]={14,6,6,12,10};
+uint8_t largos[5]={14,6,6,12,10};
 
-int precios_comidas[6]={7,15,6,30,4,5};//helado,sopa,manzana,sushi
-int cura_comidas[6]={10,40,13,30,1,1};
+uint8_t precios_comidas[6]={7,15,6,30,4,5};//helado,sopa,manzana,sushi
+uint8_t cura_comidas[6]={8,40,9,30,1,1};
 
 
 //Estructura Pou
@@ -129,46 +138,53 @@ struct Pou{
   int nivel;
   bool limpieza;
 };
-Pou Yo={100,100,100,20,0,false};
+Pou Yo={70,70,70,70,0,false};
 
 
 void reduccion_valores(){
   timer++;
   if(timer==1000){
-    Yo.saciedad-=5;
-    Yo.energia-=2;
-    Yo.alegria-=3;
-    Yo.salud-=2;
+    Yo.saciedad-=2;
+    Yo.energia-=1;
+    Yo.alegria-=2;
   }
   if(timer==2000){
     Yo.energia-=2;
-    Yo.saciedad-=2;
-    Yo.alegria-=2;
-    Yo.salud-=2;
+    Yo.saciedad-=1;
+    Yo.alegria-=1;
+    Yo.salud-=1;
     Yo.nivel++;
     timer=0;
   }
-  if(Yo.energia<80 && Yo.salud<60){
+  if(Yo.salud<87){
     Yo.limpieza=true;
   }
-  if(Yo.limpieza && timer==500){
+  if(Yo.saciedad<40 && timer==500){
     Yo.salud-=2;
+    Yo.energia-=1;
+  }
+  if(Yo.energia<50 && timer==500){
+    Yo.salud-=1;
+    Yo.saciedad-=1;
+  }
+  if(Yo.limpieza && timer==500){
+    Yo.salud-=4;
   }
 }
 
 void comida(){
-  int i=0;
+  uint8_t i=0;
   delay(500);
   while(digitalRead(B)==1){
-    int lectura1;
-    int lectura2;
+    bool lectura1;
+    bool lectura2;
     lectura1=digitalRead(IZQUIERDA);
     lectura2=digitalRead(DERECHA);
 
-    if(lectura1==0 && i!=0){
+    if(lectura1==false && i!=0){
       i--;
     }
-    if(lectura2==0 && i!=2){
+    if(lectura2==false && i!=2){
       i++;
     }
     //Lista de juegos
@@ -206,7 +222,7 @@ void comida(){
       Yo.saciedad+=cura_comidas[i];
       if(i==0) Yo.alegria+=4;Yo.energia++;
       if(i==1) Yo.salud+=20;
-      if(i==1) Yo.salud+=10;
+      if(i==2) Yo.salud+=6;
       display.clearDisplay();
       delay(30);
       display.setCursor(0,0);
@@ -229,7 +245,6 @@ void comida(){
 }
 
 void tienda(){
-  int i=0;
   delay(200);
   while(digitalRead(B)==1){
     //Lista de juegos
@@ -238,12 +253,10 @@ void tienda(){
     display.setCursor(10,8);
     display.print("Comida");
     //Cursor
-    display.setCursor(0,i*8 +8);
+    display.setCursor(0,8);
     display.print(">");
     if(digitalRead(A)==0){
-      switch(i){
-        case 0: comida(); break;
-      }
+      comida(); break;
     }
     display.display();
     reduccion_valores();
@@ -355,9 +368,14 @@ void Menu::cuarto(){
     display.print("ZZZ");
     display.drawBitmap(30,8,pou_dormidoa,27,19,WHITE);
     display.display();
+    delay(1000);
+    display.clearDisplay();
+    display.drawBitmap(30,8,pou_dormidoa2,27,19,WHITE);
+    display.display();
+    
     while(digitalRead(B)==1 && Yo.energia<100){
       i++;
-      if(i==800){
+      if(i==400){
         Yo.energia+=2;
         Yo.salud-=1;
         Yo.saciedad-=1;
@@ -365,11 +383,12 @@ void Menu::cuarto(){
       
       if(i==1000){
         Yo.saciedad-=1;
-        Yo.alegria-=3;
+        Yo.alegria-=1;
+        Yo.nivel++;
         i=0;
         
       } 
-      delay(30);
+      delay(60);
     }
   }
 }
@@ -377,12 +396,13 @@ void Menu::cuarto(){
 void Menu::sala_de_aseo(){
   display.setCursor(20,0);
   display.print("Aseo");
-  if(digitalRead(A)==0 && Yo.salud<60){
+  if(digitalRead(A)==0 && Yo.limpieza){
     display.clearDisplay();
     display.setCursor(20,0);
     display.print("limpiando...");
     display.display();
-    Yo.salud=70;
+    Yo.salud+=20;
+    Yo.limpieza=false;
     delay(1000);
   }
 }
@@ -467,8 +487,8 @@ class Comida{
   float x;
   float y;
   float velocidad;
-  int ancho=7;
-  int largo=7;
+  //int ancho=7;
+  //int largo=7;
   bool toque=false;
   public:
     Comida(int,int,float);
@@ -541,8 +561,8 @@ int Obstaculo::get_y(){
   return y;
 }
 
-void minijuego_gloton(){ //Se colocara aca el bucle del minijuego
-  long puntaje=0;
+void minijuego_gloton(){ 
+  int puntaje=0;
 
   Gloton player(40,17);
   Comida helado1(45,0,1.2);
@@ -550,7 +570,7 @@ void minijuego_gloton(){ //Se colocara aca el bucle del minijuego
   Obstaculo machete1(100,0);
   Obstaculo machete2(120,6);
 
-  while(fallos<=7){
+  while(fallos<=7){ //Se colocara aca el bucle del minijuego gloton
     player.dibujar();
     helado1.dibujar();
     helado2.dibujar();
@@ -633,7 +653,7 @@ void minijuego_gloton(){ //Se colocara aca el bucle del minijuego
 class Tubos{
   float x;
   float y;
-  int evitados=0;
+  uint8_t evitados=0;
   //ancho=8
   //largo=4
   public:
@@ -686,10 +706,8 @@ void minijuego_flappypou(){
   Tubos tubo1(128,random(8)+2);
   Tubos tubo2(128,random(8)+2);
   Tubos tubo3(128,random(8)+2);
-  int clock=0;
+  uint8_t clock=0;
   int i=0;
-  float c=10;
-  int d=0;
   while(fallos==0 && tubo1.get_evitados()+tubo2.get_evitados()+tubo3.get_evitados()<1000){
     player_y+=0.1*(i);//movimiento
 
@@ -742,6 +760,7 @@ void minijuego_flappypou(){
   display.display();
   delay(1500);
   display.clearDisplay();
+  Yo.nivel+=puntaje/100;
 
   if(puntaje>puntaje_max_flappypou){
     display.setCursor(0,0);
@@ -778,18 +797,18 @@ void Menu::sala_de_juegos(){
 
 
 void Menu::lista_de_juegos(){
-  int i=0;
+  uint8_t i=0;
   delay(1000);
   while(digitalRead(B)==1){
-    int lectura1;
-    int lectura2;
+    bool lectura1;
+    bool lectura2;
     lectura1=digitalRead(IZQUIERDA);
     lectura2=digitalRead(DERECHA);
 
-    if(lectura1==0 && i!=0){
+    if(lectura1==false && i!=0){
       i--;
     }
-    if(lectura2==0 && i!=1){
+    if(lectura2==false && i!=1){
       i++;
     }
     //Lista de juegos
@@ -820,8 +839,6 @@ void setup()
   randomSeed(analogRead(A0));//Para resultados aleatorios en ciertos minijuegos
   
   //teclas
-  pinMode(ARRIBA,INPUT_PULLUP);
-  pinMode(ABAJO,INPUT_PULLUP);
   pinMode(IZQUIERDA,INPUT_PULLUP);
   pinMode(DERECHA,INPUT_PULLUP);
   pinMode(B,INPUT_PULLUP);
@@ -833,7 +850,7 @@ void setup()
   delay(2000);
 }
 
-void transicion_de(char word1[],int largo1,char word2[],int y){
+void transicion_de(char word1[],uint8_t largo1,char word2[],int y){
   for(int i=20;i>0-largo1;i-=16){
     display.setCursor(i,y);
     display.print(word1);
@@ -850,7 +867,7 @@ void transicion_de(char word1[],int largo1,char word2[],int y){
   }
 }
 
-void transicion_iz(char word1[],int largo1,char word2[],int y){
+void transicion_iz(char word1[],uint8_t largo1,char word2[],int y){
   for(int i=20;i<128+largo1;i+=16){
     display.setCursor(i,y);
     display.print(word1);
@@ -876,17 +893,18 @@ void loop()
   bool vida=true;
   while(vida){
     M.eleccion();
-    if(Yo.alegria<40 && Yo.alegria>=30){
-      display.drawBitmap(40,10,pou_molestoa,27,19,WHITE);
-    }
-    else if(Yo.alegria<30){
-      display.drawBitmap(40,10,pou_tristea,27,19,WHITE);
+
+    if(Yo.salud<40){
+      display.drawBitmap(40,10,pou_enfermoa,27,19,WHITE);
     }
     else if(Yo.saciedad<40){
       display.drawBitmap(40,10,pou_hambrientoa,27,19,WHITE);
     }
-    else if(Yo.salud<40){
-      display.drawBitmap(40,10,pou_enfermoa,27,19,WHITE);
+    else if(Yo.alegria<30){
+      display.drawBitmap(40,10,pou_tristea,27,19,WHITE);
+    }
+    else if(Yo.alegria<40 && Yo.alegria>=30){
+      display.drawBitmap(40,10,pou_molestoa,27,19,WHITE);
     }
     else{
       display.drawBitmap(40,10,pou_feliz,27,19,WHITE);
@@ -933,7 +951,7 @@ void loop()
     if(Yo.energia>100)  Yo.energia=100;
 
 
-    if(Yo.salud==0 || Yo.saciedad==0 || Yo.energia==0 || Yo.alegria==0 || Yo.nivel==500){
+    if(Yo.salud==0 || Yo.saciedad==0 || Yo.energia==0 || Yo.alegria==0 || Yo.nivel==280){
       vida=false;   
     }
     
